@@ -10,9 +10,9 @@ function getHMWFromLS(field: string) {
     return parseInt(getLS(`hmw_${field}`) || '', 10)
 }
 const howManyWait = {
-    hour: getHMWFromLS('hour') || 1,
-    minutes: getHMWFromLS('minutes') || 0,
-    seconds: getHMWFromLS('seconds') || 0,
+    hour: getHMWFromLS('hour') >= 0 ? getHMWFromLS('hour') : 1,
+    minutes: getHMWFromLS('minutes') >= 0 ? getHMWFromLS('minutes') : 0,
+    seconds: getHMWFromLS('seconds') >= 0 ? getHMWFromLS('seconds') : 0,
 }
 const howManyLeft = { ...howManyWait }
 const startDate = new Date()
@@ -68,7 +68,7 @@ function start() {
     targetTime.setMinutes(currentDate.getMinutes() + howManyLeft.minutes)
     targetTime.setSeconds(currentDate.getSeconds() + howManyLeft.seconds)
     interval = setInterval(() => {
-        if (!timerActive) {
+        if (!timerActive.value) {
             pause()
         }
         if (needRefresh) {
@@ -106,25 +106,29 @@ function fN(n: number) {
 <template>
     <div v-if="!isEditMode" class="block" :class="{ red_back: !timerActive }">
         <p>{{ timerTitle }}</p>
-        <button @click="start" title="start" :class="{ gray: isStart, blue: !isStart }"> play </button>
+        <button @click="start" title="start" :class="{ gray: isStart, blue: !isStart }"> 行く </button>
         <button @click="pause" title="pause" :class="{ gray: !isStart, blue: isStart }"> 二 </button>
         {{ fN(refTimer.hour) }}:{{ fN(refTimer.minutes) }}:{{ fN(refTimer.seconds) }}
-        <button @click="removeTimer" class="red"> X </button>
+        <button @click="refresh" title="refresh"> 新た </button>
     </div>
     <div v-if="isEditMode" class="block">
         <input type="text" @change="onChangeTimerTitle" :value="timerTitle" class="timer_title">
         <input type="number" min="0" max="24" :value="howManyWait.hour" @change="onChangeHour">
         <input type="number" min="0" max="60" :value="howManyWait.minutes" @change="onChangeMinutes">
         <input type="number" min="0" max="60" :value="howManyWait.seconds" @change="onChangeSec">
+        <button @click="removeTimer" class="red"> X </button>
     </div>
 </template>
 
 <style scoped>
 .block {
     display: inline-block;
-    padding: 5px 10px;
-    width: 200px;
+    padding: 0px 10px 10px;
+    width: 220px;
     font-size: 20px;
+    border: 1px solid rgb(185, 177, 177);
+    border-radius: 10px;
+    margin: 2px;
 }
 
 .timer_title {
@@ -134,13 +138,22 @@ function fN(n: number) {
 }
 
 .blue {
-    background-color: rgb(85, 85, 165);
+    background-color: rgb(145, 145, 230);
     cursor: pointer;
+    border: 0;
+    border-bottom: 1px solid rgb(145, 145, 230);
+}
+
+.blue:hover {
+    background-color: rgb(161, 161, 212);
 }
 
 .gray {
     pointer-events: none;
-    background-color: gray;
+    background-color: rgb(92, 92, 92);
+    color: rgb(190, 190, 190);
+    border: 0;
+    border-bottom: 1px solid rgb(92, 92, 92);
 }
 
 .red {
@@ -148,6 +161,6 @@ function fN(n: number) {
 }
 
 .red_back {
-    background-color: brown;
+    background-color: rgb(219, 105, 105);
 }
 </style>

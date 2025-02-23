@@ -34,6 +34,7 @@ function removeTimer() {
     localStorage.removeItem(`${timer_name}_hmw_hour`)
     localStorage.removeItem(`${timer_name}_hmw_minutes`)
     localStorage.removeItem(`${timer_name}_hmw_seconds`)
+    localStorage.setItem('vue_timers_arr', JSON.stringify(props.timers))
 }
 function refresh() {
     pause()
@@ -59,18 +60,15 @@ function start() {
     if (isStart.value) {
         return
     }
-    if (!timerActive) {
-        refresh()
-    }
+    // if (!timerActive) {
+    //     refresh()
+    // }
     isStart.value = true
     const currentDate = new Date()
     targetTime.setHours(currentDate.getHours() + howManyLeft.hour)
     targetTime.setMinutes(currentDate.getMinutes() + howManyLeft.minutes)
     targetTime.setSeconds(currentDate.getSeconds() + howManyLeft.seconds)
     interval = setInterval(() => {
-        if (!timerActive.value) {
-            pause()
-        }
         if (needRefresh) {
             needRefresh = false
             refresh()
@@ -78,9 +76,12 @@ function start() {
         }
         const now = (targetTime.getTime() - Date.now()) / 1000
         refTimer.value = {
-            hour: Math.floor(now / 3600),
-            minutes: Math.floor(now / 60 % 60),
-            seconds: Math.floor(now % 60),
+            hour: now > 0 ? Math.floor(now / 3600) : 0,
+            minutes: now > 0 ? Math.floor(now / 60 % 60) : 0,
+            seconds: now > 0 ? Math.floor(now % 60) : 0,
+        }
+        if (!timerActive.value) {
+            pause()
         }
     }, 1000)
 }
